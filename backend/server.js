@@ -40,6 +40,21 @@ app.use(cors());
 // Use Route
 app.use('/api/products', productRoute)
 
+// Health check endpoint for container monitoring
+app.get('/health', (req, res) => {
+    const healthStatus = {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        service: 'yolo-backend',
+        uptime: process.uptime(),
+        database: db.readyState === 1 ? 'connected' : 'disconnected',
+        environment: process.env.NODE_ENV || 'development'
+    };
+    // Return 200 if healthy, 503 if database issues
+    const statusCode = db.readyState === 1 ? 200 : 503;
+    res.status(statusCode).json(healthStatus);
+});
+
 // Define the PORT
 const PORT = process.env.PORT || 5000
 
