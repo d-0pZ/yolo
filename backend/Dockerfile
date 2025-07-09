@@ -1,34 +1,37 @@
-# Using Node.js version that matches package.json requirements
-FROM node:13.12.0-alpine
+# ---------- Build Stage ----------
+FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files first for better Docker layer caching
+# Copy only package files first to leverage Docker layer cache
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci && npm prune --production && npm cache clean --force
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# Install only production dependencies
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy application source code
 COPY . .
 
-# Change ownership to nodejs user
-RUN chown -R nodejs:nodejs /app
+# ---------- Runtime Stage ----------
+FROM node:18-alpine
 
-# Switch to non-root user
+WORKDIR /app
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Copy the built app and deps from the builder stage
+COPY --from=builder --chown=nodejs:nodejs /app /app
+
 USER nodejs
 
-# Expose the port the app runs on
+# Expose your app's port
 EXPOSE 5000
 
-# Add health check for container monitoring
+# Health check to monitor container health
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
-# Start the application
+# Start your app
 CMD ["npm", "start"]
