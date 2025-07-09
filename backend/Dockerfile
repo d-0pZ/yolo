@@ -8,8 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-# Use npm ci for faster, reliable, reproducible builds
-RUN npm ci --only=production && \
+RUN npm install --only=production && \
     npm cache clean --force
 
 # Create non-root user for security
