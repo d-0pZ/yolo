@@ -15,3 +15,45 @@ README.md
 .vscode
 app-mongo-data
 app-mongo-data/
+
+# further optimization for image builds
+# Environment files
+.env
+.env.*
+
+# IDE/editor/project metadata
+.idea/
+*.swp
+*.swo
+*~
+
+# OS/system trash
+.DS_Store
+ehthumbs.db
+Thumbs.db
+
+# General log files
+*.log
+
+# NPM/yarn cache
+.npm
+.yarn-integrity
+
+# Test/coverage/reporting output
+coverage/
+.nyc_output/
+
+# Frontend framework build caches
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Serverless/dev tooling artifacts
+.serverless/
+.fusebox/
+.dynamodb/
+
+# REPL history
+.node_repl_history
