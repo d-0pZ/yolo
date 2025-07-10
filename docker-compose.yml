@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database Service
   mongodb:
@@ -60,7 +58,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV}
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "${FRONTEND_PORT}:3001"
     networks:
       - yolo-network
     labels:
