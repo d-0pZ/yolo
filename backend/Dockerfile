@@ -1,5 +1,5 @@
 # ---------- Build Stage ----------
-FROM node:18-alpine AS builder
+FROM node:18.20.4-alpine AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY . .
 
 # ---------- Runtime Stage ----------
-FROM node:18-alpine
+FROM node:18.20.4-alpine
 
 WORKDIR /app
 
