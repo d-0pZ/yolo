@@ -31,7 +31,8 @@ ENV NODE_ENV=$NODE_ENV
 WORKDIR /app
 
 # Install serve globally to serve the React build
-RUN npm install -g serve@11.3.2
+RUN apk add --no-cache curl && \
+    npm install -g serve@11.3.2
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S reactuser && \
