@@ -31,7 +31,7 @@ ENV NODE_ENV=$NODE_ENV
 WORKDIR /app
 
 # Install serve globally to serve the React build
-RUN npm install -g serve
+RUN npm install -g serve@11.3.2
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S reactuser && \
@@ -43,8 +43,8 @@ COPY --from=builder --chown=reactuser:reactuser /app/build /app/build
 # Switch to non-root user
 USER reactuser
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 3001
+EXPOSE 3001
 
 # Start React app using serve
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "3001"]
