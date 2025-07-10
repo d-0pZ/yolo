@@ -1,5 +1,9 @@
 # ---------- Build Stage ----------
-FROM node:18.20.4-alpine AS builder
+FROM node:13.12.0-alpine AS builder
+
+# Build argument for environment (flexibility)
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
 WORKDIR /app
 
@@ -7,13 +11,17 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
 # Copy application source code
 COPY . .
 
 # ---------- Runtime Stage ----------
-FROM node:18.20.4-alpine
+FROM node:13.12.0-alpine
+
+# Set environment from build arg
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
 WORKDIR /app
 
