@@ -1,7 +1,7 @@
 # ---------- Build Stage ----------
 FROM node:13.12.0-alpine AS builder
 
-# Build argument for environment (flexibility)
+# Build argument for environment
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
@@ -36,10 +36,6 @@ USER nodejs
 
 # Expose your app's port
 EXPOSE 5000
-
-# Health check to monitor container health
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
 # Start your app
 CMD ["npm", "start"]
