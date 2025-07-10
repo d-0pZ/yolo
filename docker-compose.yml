@@ -7,18 +7,18 @@ services:
     container_name: yolo-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: Iqra
-      MONGO_INITDB_ROOT_PASSWORD: devops10
-      MONGO_INITDB_DATABASE: yolodb
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
-      - "27017:27017"
+      - "${MONGODB_PORT}:27017"
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
     networks:
       - yolo-network
     labels:
-      project: yolo
+      project: ${PROJECT_NAME}
       service: mongodb
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
@@ -33,13 +33,13 @@ services:
     container_name: yolo-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     networks:
       - yolo-network
     labels:
-      project: yolo
+      project: ${PROJECT_NAME}
       service: redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -55,23 +55,23 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       args:
-        NODE_ENV: production
-    image: yolo-backend:v1.0.0
+        NODE_ENV: ${NODE_ENV}
+    image: yolo-backend:${PROJECT_VERSION}
     container_name: yolo-backend
     restart: unless-stopped
     environment:
-      NODE_ENV: production
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/yolodb?authSource=admin
-      PORT: 5000
-      REDIS_URL: redis://redis:6379
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      PORT: ${BACKEND_PORT}
+      REDIS_URL: ${REDIS_URL}
     ports:
-      - "5000:5000"
+      - "${BACKEND_PORT}:5000"
     volumes:
       - ./backend/uploads:/app/uploads
     networks:
       - yolo-network
     labels:
-      project: yolo
+      project: ${PROJECT_NAME}
       service: backend
     depends_on:
       mongodb:
@@ -91,18 +91,18 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        NODE_ENV: production
-    image: yolo-frontend:v1.0.0
+        NODE_ENV: ${NODE_ENV}
+    image: yolo-frontend:${PROJECT_VERSION}
     container_name: yolo-frontend
     restart: unless-stopped
     environment:
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV}
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT}:3000"
     networks:
       - yolo-network
     labels:
-      project: yolo
+      project: ${PROJECT_NAME}
       service: frontend
     depends_on:
       backend:
@@ -120,9 +120,9 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
-          ip_range: 172.20.240.0/20
-          gateway: 172.20.0.1
+        - subnet: ${NETWORK_SUBNET}
+          ip_range: ${NETWORK_IP_RANGE}
+          gateway: ${NETWORK_GATEWAY}
 
 # Defining persistent volumes for stateful services
 volumes:
