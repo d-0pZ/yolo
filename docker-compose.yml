@@ -1,23 +1,21 @@
 services:
-  # MongoDB Database Service
-  mongodb:
-    image: mongo:5.0
-    container_name: yolo-mongodb
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    container_name: yolo-redis
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
-      - "${MONGODB_PORT}:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+      - "6379:6379"
     networks:
       - yolo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     labels:
       project: ${PROJECT_NAME}
-      service: mongodb
+      service: redis
 
   # Backend API Service
   backend:
@@ -32,6 +30,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV}
       MONGODB_URI: ${MONGODB_URI}
+      REDIS_URL: redis://redis:6379
       PORT: ${BACKEND_PORT}
     ports:
       - "${BACKEND_PORT}:5000"
@@ -39,11 +38,17 @@ services:
       - ./backend/uploads:/app/uploads
     networks:
       - yolo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/products"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       project: ${PROJECT_NAME}
       service: backend
     depends_on:
-      - mongodb
+      - redis
 
   # Frontend Web Service (React)
   frontend:
@@ -61,13 +66,18 @@ services:
       - "${FRONTEND_PORT}:3001"
     networks:
       - yolo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       project: ${PROJECT_NAME}
       service: frontend
     depends_on:
       - backend
 
-# Defining a custom bridge network with control over IP space
 networks:
   yolo-network:
     driver: bridge
@@ -76,10 +86,3 @@ networks:
         - subnet: ${NETWORK_SUBNET}
           ip_range: ${NETWORK_IP_RANGE}
           gateway: ${NETWORK_GATEWAY}
-
-# Defining persistent volumes for stateful services
-volumes:
-  mongodb_data:
-    driver: local
-  mongodb_config:
-    driver: local
