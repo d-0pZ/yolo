@@ -21,37 +21,30 @@ COPY . .
 RUN npm run build
 
 # ---------- Production Stage ----------
-FROM nginx:1.25-alpine
+FROM node:13.12.0-alpine
 
-# Build argument for environment (consistency across stages)
+# Build argument for environment
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Set working directory
+WORKDIR /app
 
-# Copy built React application from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+# Install serve globally to serve the React build
+RUN npm install -g serve
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nginxuser && \
-    adduser -S nginxuser -u 1001 -G nginxuser && \
-    chown -R nginxuser:nginxuser /usr/share/nginx/html && \
-    chown -R nginxuser:nginxuser /var/cache/nginx && \
-    chown -R nginxuser:nginxuser /var/log/nginx && \
-    chown -R nginxuser:nginxuser /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginxuser:nginxuser /var/run/nginx.pid
+RUN addgroup -g 1001 -S reactuser && \
+    adduser -S reactuser -u 1001 -G reactuser
+
+# Copy built React application from builder stage
+COPY --from=builder --chown=reactuser:reactuser /app/build /app/build
 
 # Switch to non-root user
-USER nginxuser
+USER reactuser
 
 # Expose port 3000
 EXPOSE 3000
 
-# Health check for container monitoring
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
-
-# Start nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Start React app using serve
+CMD ["serve", "-s", "build", "-l", "3000"]
