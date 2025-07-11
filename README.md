@@ -7,3 +7,4 @@ removed test container
 added dockerignore file
 build succes plus container network okay
 image push to dockerhub
+orchestration
