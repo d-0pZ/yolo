@@ -1,3 +1,0 @@
-redis cache
-mongodb
-curl
