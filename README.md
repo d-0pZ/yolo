@@ -1,2 +1,3 @@
 redis cache
 mongodb
+curl
