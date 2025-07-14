@@ -1,5 +1,4 @@
 services:
-  # Redis Cache Service
   redis:
     image: redis:7-alpine
     container_name: yolo-redis
@@ -17,7 +16,6 @@ services:
       project: ${PROJECT_NAME}
       service: redis
 
-  # Backend API Service
   backend:
     build:
       context: ./backend
@@ -50,7 +48,6 @@ services:
     depends_on:
       - redis
 
-  # Frontend Web Service (React)
   frontend:
     build:
       context: ./client
@@ -63,11 +60,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV}
     ports:
-      - "${FRONTEND_PORT}:3001"
+      - "${FRONTEND_PORT}:80"
     networks:
       - yolo-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
